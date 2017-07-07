@@ -1,0 +1,22 @@
+#!/bin/sh -e
+
+set -e
+
+if [ -d /run/systemd/system ] ; then
+	systemctl --system daemon-reload >/dev/null || true
+fi
+
+if [ "$1" = "remove" ]; then
+	if [ -x "/usr/bin/deb-systemd-helper" ]; then
+		deb-systemd-helper mask microphone-server.service >/dev/null
+	fi
+fi
+
+if [ "$1" = "purge" ]; then
+	if [ -x "/usr/bin/deb-systemd-helper" ]; then
+		deb-systemd-helper purge microphone-server.service >/dev/null
+		deb-systemd-helper unmask microphone-server.service >/dev/null
+	fi
+fi
+
+exit 0
