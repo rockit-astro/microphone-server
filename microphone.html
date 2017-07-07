@@ -1,0 +1,88 @@
+<html>
+<head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/binaryjs/0.2.1/binary.min.js"></script>
+  <script>
+  var audioClient = null;
+  var audioVolumeController = null;
+
+  function startAudioStream(websocketAddress, sampleRate, latency, gain) {
+    var AudioContext = window.AudioContext || window.webkitAudioContext;
+    var context = new AudioContext();
+    var nextTime = 0;
+
+    function update(array) {
+      buffer = context.createBuffer(1, array.byteLength / 4, sampleRate);
+
+      if (typeof buffer.copyToChannel === "function")
+        buffer.copyToChannel(array, 0);
+      else
+        buffer.getChannelData(0).set(array);
+
+      var source = context.createBufferSource();
+      source.buffer = buffer;
+
+      if (nextTime == 0)
+        nextTime = context.currentTime + latency;
+
+      source.start(nextTime);
+      source.connect(context.destination);
+      nextTime += buffer.duration;
+    }
+
+    audioClient = new BinaryClient(websocketAddress);
+    audioClient.on('stream', function(stream, meta) {
+      stream.on('data', function(data){
+        update(new Float32Array(data));
+      });
+    });
+  }
+
+  function stopAudioStream() {
+    if (audioClient != null)
+      audioClient.close();
+
+    audioClient = null;
+    audioVolumeController = null;
+  }
+
+  $(document).ready(function () {
+    var audioPlaying = false;
+    $('#audio-button').click(function() {
+      if (audioPlaying) {
+        $('#audio-button').html('Connect');
+        stopAudioStream();
+        audioPlaying = false;
+      } else {
+        var ipButton = $('#ip');
+        var portButton = $('#port');
+        var ip = ipButton.val() || ipButton.prop('placeholder');
+        var port = portButton.val() || portButton.prop('placeholder');
+        $('#audio-button').html('Disconnect');
+        startAudioStream('ws://' + ip + ':' + port, 22050, 0.2, 1.0);
+        audioPlaying = true;
+      }
+    });
+  });
+  </script>
+</head>
+<body>
+  <div style="width: 300px; height 100px; margin: 15px auto 0 auto; padding: 5px; border: #ddd 1px solid; border-radius: 4px">
+    <div class="input-group" style="margin-bottom: 10px">
+      <span class="input-group-addon" id="ip-label">IP</span>
+      <input id="ip" type="text" class="form-control" placeholder="localhost" aria-describedby="ip-label">
+    </div>
+    <div class="input-group" style="margin-bottom: 10px">
+      <span class="input-group-addon" id="port-label">Port</span>
+      <input id="port" type="text" class="form-control" placeholder="9000" aria-describedby="port-label">
+    </div>
+    <div class="input-group" style="text-align: center">
+      <span class="input-group-btn">
+        <a class="btn btn-primary" type="button" style="border-radius: 4px" id="audio-button">Connect</a>
+      </span>
+    </div>
+  </div>
+</body>
+</html>
