@@ -1,8 +1,12 @@
-node:
-	mkdir -p build/var/www/microphone-server
-	mkdir -p build/lib/systemd/system/
-	cp -r DEBIAN build
-	cp -r node_modules server.js build/var/www/microphone-server
-	cp microphone-server.service build/lib/systemd/system/
-	fakeroot dpkg-deb -b build "microphone_server_1.1_all.deb"
+RPMBUILD = rpmbuild --define "_topdir %(pwd)/build" \
+        --define "_builddir %{_topdir}" \
+        --define "_rpmdir %{_topdir}" \
+        --define "_srcrpmdir %{_topdir}" \
+        --define "_sourcedir %(pwd)"
+
+all:
+	mkdir -p build
+	${RPMBUILD} --define "_version $$(date --utc +%Y%m%d%H%M%S)" -ba rockit-microphone-server.spec
+	mv build/noarch/*.rpm .
 	rm -rf build
+

@@ -1,9 +1,0 @@
-Package: microphone-server
-Version: 1.0
-Architecture: all
-Maintainer: Paul Chote <p.chote@warwick.ac.uk>
-Depends: nodejs, alsa-utils, dh-systemd (>= 1.3)
-Section: misc
-Priority: extra
-Homepage: https://github.com/warwick-one-metre/microphone-server
-Description: node.js server for streaming audio from a USB microphone through a websocket

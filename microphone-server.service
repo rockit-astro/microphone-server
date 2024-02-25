@@ -7,7 +7,7 @@ After=network-online.target
 [Service]
 Restart=on-failure
 Type=simple
-ExecStart=/usr/bin/nodejs /var/www/microphone-server/server.js 9000 plughw:1,0
+ExecStart=/usr/bin/node /var/www/microphone-server/server.js 9000 plughw:0,0
 StandardOutput=syslog
 StandardError=syslog
 
