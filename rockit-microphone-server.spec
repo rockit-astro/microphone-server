@@ -1,6 +1,6 @@
 Name:      rockit-microphone-server
 Version:   %{_version}
-Release:   1
+Release:   1%{dist}
 Url:       https://github.com/rockit-astro/microphone-server
 Summary:   node.js server for streaming audio from a USB microphone through a websocket
 License:   GPL-3.0
